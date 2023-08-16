@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -14,17 +15,30 @@ public class PlayerController : MonoBehaviour
     public DriveMode mode = DriveMode.Manual;
     public bool Allow_Input = true;
 
+    [SerializeField] private float force_power = 10f;
+
+    private Rigidbody rb;
+
+
+
+
+
     // Start is called before the first frame update
 
-   public enum DriveMode
+
+    public enum DriveMode
     {
         Manual,
-        Automatic
+        Automatic,
+        Physic
     }
 
     void Start()
     {
+
         CurrentWaypoint_Index = 0;
+
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -52,6 +66,11 @@ public class PlayerController : MonoBehaviour
 
             Vector3 movement = new Vector3(horizontal_Input, 0, vertical_Input);
             transform.Translate(movement * Move_Speed * Time.deltaTime);
+
+        }
+        else if (mode == DriveMode.Physic)
+        {
+            Physic_Move();
         }
     }
 
@@ -76,4 +95,13 @@ public class PlayerController : MonoBehaviour
         return Distance < 0.1f;
     }
 
+    void Physic_Move()
+    {
+        float horizontal_Input = Input.GetAxis("Horizontal");
+        float vertical_Input = Input.GetAxis("Vertical");
+
+        Vector3 movement = new Vector3(horizontal_Input, 0, vertical_Input);
+
+        rb.AddForce(movement * force_power);
+    }
 }
