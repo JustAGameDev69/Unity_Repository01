@@ -5,6 +5,20 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private WheelCollider FrontRightWheel;
+    [SerializeField] private WheelCollider FrontLeftWheel;
+    [SerializeField] private WheelCollider RearRightWheel;
+    [SerializeField] private WheelCollider RearLeftWheel;
+
+    public float Acceleration = 500f;
+    public float Breaking_force = 300f;
+    public float Max_turnAngle = 30f;
+
+    private float Current_accleration = 0f;
+    private float Current_breakforce = 0f;
+    private float Current_turnAngle = 0f;
+
+
 
     public Transform[] Way_points;      //Tạo mảng các điểm là các waypoint trên đường
     public float Move_Speed = 10f;      //Tốc độ di chuyển
@@ -42,7 +56,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
 
         if (mode == DriveMode.Automatic)            //Nếu mode là automatic thì tự động chạy bằng waypoint.
@@ -61,12 +75,31 @@ public class PlayerController : MonoBehaviour
         }
         else if (mode == DriveMode.Manual && Allow_Input)
         {
-            float horizontal_Input = Input.GetAxis("Horizontal");
-            float vertical_Input = Input.GetAxis("Vertical");
+            Current_accleration = Acceleration * Input.GetAxis("Vertical");         //Di chuyển xe đi thẳng hay đi lùi
 
-            Vector3 movement = new Vector3(horizontal_Input, 0, vertical_Input);
-            transform.Translate(movement * Move_Speed * Time.deltaTime);
 
+            if (Input.GetKey(KeyCode.Space))        //Nhấn Space để phanh
+            {
+                Current_breakforce = Breaking_force;
+            }
+            else Current_breakforce = 0f;
+
+            //Tăng tốc cho bánh trước.
+            FrontRightWheel.motorTorque = Current_accleration;
+            FrontLeftWheel.motorTorque = Current_accleration;
+
+            //Phanh cho cả bốn bánh
+            FrontRightWheel.brakeTorque = Current_breakforce;
+            FrontLeftWheel.brakeTorque = Current_breakforce;
+            RearLeftWheel.brakeTorque = Current_breakforce;
+            RearRightWheel.brakeTorque = Current_breakforce;
+
+            //Phần Hải quay xe
+
+            Current_turnAngle = Max_turnAngle * Input.GetAxis("Horizontal");
+
+            FrontRightWheel.steerAngle = Current_turnAngle;
+            FrontLeftWheel.steerAngle = Current_turnAngle;
         }
         else if (mode == DriveMode.Physic)
         {
