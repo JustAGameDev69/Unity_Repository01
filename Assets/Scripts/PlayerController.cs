@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +18,10 @@ public class PlayerController : MonoBehaviour
     private float Current_accleration = 0f;
     private float Current_breakforce = 0f;
     private float Current_turnAngle = 0f;
+
+    private int Player_health = 100;
+    private int Player_fuel = 100;
+
 
 
 
@@ -137,4 +142,43 @@ public class PlayerController : MonoBehaviour
 
         rb.AddForce(movement * force_power);
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Damage"))
+        {
+            Player_health = Player_health - 10;       //10% damage take in everytime collide
+            if (Player_health == 0)
+            {
+                Debug.Log("Car are explode!");
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            }
+            else
+            {
+                Debug.Log("Player health: " + Player_health);
+            }
+        }
+        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("HealthBonus"))
+        {
+            if (Player_health > 90)
+            {
+                Player_health += (100 - Player_health);
+                other.gameObject.SetActive(false);
+            }
+            else
+            {
+                Player_health += 10;
+                Debug.Log("Player health: " + Player_health);
+                other.gameObject.SetActive(false);
+            }
+        }
+    }
+
+
+
 }
