@@ -24,7 +24,7 @@ public class LapCounter : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Lap_number++;
-            lapText.text ="Lap: " + Lap_number.ToString();
+            lapText.text = Lap_number.ToString();
         }
     }
 }
