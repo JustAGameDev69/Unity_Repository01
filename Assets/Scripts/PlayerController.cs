@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,13 +16,17 @@ public class PlayerController : MonoBehaviour
     public float Acceleration = 500f;
     public float Breaking_force = 300f;
     public float Max_turnAngle = 30f;
+    public TextMeshProUGUI player_Coin;
+    public Slider healthSlider;
 
     private float Current_accleration = 0f;
     private float Current_breakforce = 0f;
     private float Current_turnAngle = 0f;
 
+    private int player_current_health;
     private int Player_health = 100;
     private int Player_fuel = 100;
+    private int Player_coin = 0;
 
 
 
@@ -58,6 +64,9 @@ public class PlayerController : MonoBehaviour
         CurrentWaypoint_Index = 0;
 
         rb = GetComponent<Rigidbody>();
+
+        player_current_health = Player_health;
+        HealthBar();
     }
 
     // Update is called once per frame
@@ -105,6 +114,8 @@ public class PlayerController : MonoBehaviour
 
             FrontRightWheel.steerAngle = Current_turnAngle;
             FrontLeftWheel.steerAngle = Current_turnAngle;
+
+            HealthBar();
         }
         else if (mode == DriveMode.Physic)
         {
@@ -147,15 +158,11 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Damage"))
         {
-            Player_health = Player_health - 10;       //10% damage take in everytime collide
-            if (Player_health == 0)
+            player_current_health = player_current_health - 10;       //10% damage take in everytime collide
+            if (player_current_health == 0)
             {
                 Debug.Log("Car are explode!");
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            }
-            else
-            {
-                Debug.Log("Player health: " + Player_health);
             }
         }
         
@@ -165,18 +172,33 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("HealthBonus"))
         {
-            if (Player_health > 90)
+            if (player_current_health > 90)
             {
-                Player_health += (100 - Player_health);
+                player_current_health += (100 - player_current_health);
                 other.gameObject.SetActive(false);
             }
             else
             {
-                Player_health += 10;
-                Debug.Log("Player health: " + Player_health);
+                player_current_health += 10;
                 other.gameObject.SetActive(false);
             }
         }
+        else if (other.gameObject.CompareTag("Treasure"))
+        {
+            Player_coin += 10;
+            PlayerCoin();
+            Destroy(other.gameObject);
+        }
+    }
+
+    void PlayerCoin()
+    {
+        player_Coin.text = Player_coin.ToString();
+    }
+
+    void HealthBar()
+    {
+        healthSlider.value = player_current_health;
     }
 
 
